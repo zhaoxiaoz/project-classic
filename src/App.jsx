@@ -5,35 +5,59 @@ import TextDisplay from './components/TextDisplay'
 import FileManagement from './components/FileManagement'
 import PronunciationManager from './components/PronunciationManager'
 
+// 工具函数：导出为 txt 文件
+function exportCurrentTextAsTxt(currentText) {
+  if (!currentText || !currentText.title) {
+    alert('当前文本无标题，无法导出');
+    return;
+  }
+
+  const data = JSON.stringify(currentText, null, 2);
+  const blob = new Blob([data], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${currentText.title}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+// 工具函数：从 txt 文件中导入 JSON 格式的文本
+function importSingleTextFromTxt(file, onLoad) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      onLoad(imported);
+    } catch (error) {
+      alert('导入失败，文件格式不正确');
+    }
+  };
+  reader.readAsText(file);
+}
+
 function App() {
-  // State for the current text being memorized
   const [currentText, setCurrentText] = useState({
     title: '',
     content: '',
     pinyin: [],
     customPronunciations: {}
-  })
-  
-  // State to track the current position in the text
-  const [currentPosition, setCurrentPosition] = useState(0)
+  });
 
-  // State for the list of saved texts
-  const [savedTexts, setSavedTexts] = useState([])
+  const [currentPosition, setCurrentPosition] = useState(0);
+  const [savedTexts, setSavedTexts] = useState([]);
+  const [showFileManagement, setShowFileManagement] = useState(false);
+  const [showPronunciationManager, setShowPronunciationManager] = useState(false);
+  const [resetTrigger, setResetTrigger] = useState(0);
 
-  // State to control the display of file management UI
-  const [showFileManagement, setShowFileManagement] = useState(false)
-  
-  // State to control the display of pronunciation management UI
-  const [showPronunciationManager, setShowPronunciationManager] = useState(false)
-  
-  // Load saved texts from localStorage on component mount
   useEffect(() => {
-    const storedTexts = localStorage.getItem('ancient-texts')
+    const storedTexts = localStorage.getItem('ancient-texts');
     if (storedTexts) {
       const parsedTexts = JSON.parse(storedTexts);
       setSavedTexts(parsedTexts);
-      
-      // If there is a previously selected text, restore it
       const lastSelectedId = localStorage.getItem('ancient-texts-last-selected');
       if (lastSelectedId) {
         const lastSelected = parsedTexts.find(text => text.id === lastSelectedId);
@@ -42,44 +66,36 @@ function App() {
         }
       }
     }
-  }, [])
-  
-  // Save texts to localStorage whenever they change
+  }, []);
+
   useEffect(() => {
-    localStorage.setItem('ancient-texts', JSON.stringify(savedTexts))
-  }, [savedTexts])
+    localStorage.setItem('ancient-texts', JSON.stringify(savedTexts));
+  }, [savedTexts]);
 
   return (
     <div className="app-container">
       <h1>Helper</h1>
-      
+
       <div className="main-content">
         {showFileManagement ? (
           <div>
             <FileManagement 
               savedTexts={savedTexts}
               onSelectText={(text) => {
-                setCurrentText(text)
-                setCurrentPosition(0)
-                // 保存最后选择的文本ID
-                localStorage.setItem('ancient-texts-last-selected', text.id)
-                setShowFileManagement(false)
+                setCurrentText(text);
+                setCurrentPosition(0);
+                localStorage.setItem('ancient-texts-last-selected', text.id);
+                setShowFileManagement(false);
               }}
               onSaveText={(newText) => {
                 const newSavedTexts = [...savedTexts, newText];
                 setSavedTexts(newSavedTexts);
-                
-                // 立即保存到localStorage
                 localStorage.setItem('ancient-texts', JSON.stringify(newSavedTexts));
-                
-                // 自动选择新添加的文本
                 setCurrentText(newText);
                 localStorage.setItem('ancient-texts-last-selected', newText.id);
               }}
               onDeleteText={(textId) => {
-                // 检查是否删除当前选中的文本
                 if (currentText.id === textId) {
-                  // 如果删除的是当前文本，清除当前选择
                   setCurrentText({
                     title: '',
                     content: '',
@@ -89,11 +105,8 @@ function App() {
                   setCurrentPosition(0);
                   localStorage.removeItem('ancient-texts-last-selected');
                 }
-                
                 const newSavedTexts = savedTexts.filter(text => text.id !== textId);
                 setSavedTexts(newSavedTexts);
-                
-                // 立即更新localStorage
                 localStorage.setItem('ancient-texts', JSON.stringify(newSavedTexts));
               }}
             />
@@ -110,25 +123,14 @@ function App() {
                 const updatedText = {
                   ...currentText,
                   customPronunciations: updatedPronunciations
-                }
-                
-                // Update current text
-                console.log('Saving updated pronunciations:', updatedPronunciations);
+                };
                 setCurrentText(updatedText);
-                
-                // Update in saved texts
                 const newSavedTexts = savedTexts.map(text => 
                   text.id === currentText.id ? updatedText : text
                 );
                 setSavedTexts(newSavedTexts);
-                
-                // 立即保存到localStorage，确保数据不会丢失
                 localStorage.setItem('ancient-texts', JSON.stringify(newSavedTexts));
-                
-                // For debugging
-                console.log('Updated current text:', updatedText);
-                
-                setShowPronunciationManager(false)
+                setShowPronunciationManager(false);
               }}
             />
             <div className="controls">
@@ -138,55 +140,88 @@ function App() {
         ) : (
           <div className="memorization-container">
             <h2>{currentText.title || '未选择文本'}</h2>
-            
-            <TextDisplay 
+
+            {/* <TextDisplay 
               text={currentText.content} 
               currentPosition={currentPosition}
-            />
-            
+            /> */}
+
             <div className="input-container">
               <InputComponent 
                 text={currentText.content}
                 pinyin={currentText.pinyin}
                 customPronunciations={currentText.customPronunciations}
                 onCorrectInput={(position) => setCurrentPosition(position)}
+                resetTrigger={resetTrigger}
               />
-              {currentText.content && currentPosition >= 0 && currentPosition < currentText.content.length && (
+              {currentText.content && currentPosition > 0 && currentPosition - 1 < currentText.content.length && (
                 <div className="current-hint">
-                  <small>当前字: <strong>{currentText.content[currentPosition]}</strong></small>
+                  <small>当前字: <strong>{currentText.content[currentPosition - 1]}</strong></small>
                   {(() => {
-                    // 检查是否有自定义拼音
-                    const positionKey = `${currentPosition}:${currentText.content[currentPosition]}`;
-                    if (currentText.customPronunciations && currentText.customPronunciations[positionKey]) {
-                      return <small>拼音: <strong style={{color: '#2196f3'}}>{currentText.customPronunciations[positionKey]}</strong></small>;
-                    } else if (currentText.pinyin && currentText.pinyin[currentPosition]) {
-                      return <small>拼音: {currentText.pinyin[currentPosition]}</small>;
+                    const key = `${currentPosition - 1}:${currentText.content[currentPosition - 1]}`;
+                    if (currentText.customPronunciations?.[key]) {
+                      return <small>拼音: <strong style={{ color: '#2196f3' }}>{currentText.customPronunciations[key]}</strong></small>;
+                    } else if (currentText.pinyin?.[currentPosition - 1]) {
+                      return <small>拼音: {currentText.pinyin[currentPosition - 1]}</small>;
                     }
                     return null;
                   })()}
                 </div>
               )}
             </div>
-            
+
             <div className="controls">
               <button onClick={() => setShowFileManagement(true)}>文件管理</button>
               {currentText.content && (
                 <button onClick={() => setShowPronunciationManager(true)}>多音字管理</button>
               )}
-              {currentPosition === currentText.content.length && currentText.content.length > 0 && (
-                <button 
-                  onClick={() => setCurrentPosition(0)}
+              {currentText.content && currentPosition === currentText.content.length && (
+                <button
+                  onClick={() => {
+                    setCurrentPosition(0);
+                    setResetTrigger(prev => prev + 1);
+                  }}
                   style={{ backgroundColor: '#4caf50', fontWeight: 'bold' }}
                 >
                   重新开始
                 </button>
               )}
+              <div style={{ marginTop: '1em' }}>
+                <input
+                  type="file"
+                  accept=".txt"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      importSingleTextFromTxt(file, (importedText) => {
+                        const exists = savedTexts.find(text => text.id === importedText.id);
+                        const updatedTexts = exists
+                          ? savedTexts.map(text => text.id === importedText.id ? importedText : text)
+                          : [...savedTexts, importedText];
+
+                        setSavedTexts(updatedTexts);
+                        setCurrentText(importedText);
+                        setCurrentPosition(0);
+                        localStorage.setItem('ancient-texts', JSON.stringify(updatedTexts));
+                        localStorage.setItem('ancient-texts-last-selected', importedText.id);
+                        alert('导入成功');
+                      });
+                    }
+                  }}
+                />
+                <button
+                  onClick={() => exportCurrentTextAsTxt(currentText)}
+                  style={{ marginLeft: '0.5em' }}
+                >
+                  导出当前文本
+                </button>
+              </div>
             </div>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

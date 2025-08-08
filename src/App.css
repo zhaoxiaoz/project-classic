@@ -17,7 +17,7 @@
   width: 100%;
   max-width: 800px;
   margin-top: 2rem;
-  background-color: #f9f9f9;
+  background-color: #000;
   border-radius: 8px;
   padding: 2rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -333,17 +333,17 @@ button:hover {
   border: 1px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
-  background-color: white;
+  background-color: #2196f3;
   transition: all 0.2s;
 }
 
 .char-item:hover {
-  background-color: #f0f0f0;
+  background-color: #1976d2;
   transform: scale(1.1);
 }
 
 .char-item.has-pronunciation {
-  background-color: #e3f2fd;
+  background-color: #2e7d32;
   border-color: #2196f3;
 }
 

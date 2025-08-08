@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getPinyinInitial, isPunctuation } from '../utils/pinyinUtil';
 
-function InputComponent({ text, pinyin, onCorrectInput, customPronunciations }) {
+function InputComponent({ text, pinyin, onCorrectInput, customPronunciations, resetTrigger }) {
   const [input, setInput] = useState('');
   const [currentPosition, setCurrentPosition] = useState(0);
   const [displayedChars, setDisplayedChars] = useState([]);
@@ -12,6 +12,12 @@ function InputComponent({ text, pinyin, onCorrectInput, customPronunciations }) 
     setCurrentPosition(0);
     setDisplayedChars([]);
   }, [text]);
+
+  useEffect(() => {
+    setInput('');
+    setCurrentPosition(0);
+    setDisplayedChars([]);
+  }, [resetTrigger]);
 
   // Helper function to get the pinyin initial of a character for the current position
   // Used in getFollowingPunctuation
@@ -107,7 +113,7 @@ function InputComponent({ text, pinyin, onCorrectInput, customPronunciations }) 
         setInput('');
         
         // Notify parent component
-        onCorrectInput(newPosition);
+        onCorrectInput(nextPosition);
       }
     }
   };
