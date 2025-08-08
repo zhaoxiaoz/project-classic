@@ -4,6 +4,8 @@ import InputComponent from './components/InputComponent'
 import TextDisplay from './components/TextDisplay'
 import FileManagement from './components/FileManagement'
 import PronunciationManager from './components/PronunciationManager'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // 工具函数：导出为 txt 文件
 function exportCurrentTextAsTxt(currentText) {
@@ -52,6 +54,9 @@ function App() {
   const [showFileManagement, setShowFileManagement] = useState(false);
   const [showPronunciationManager, setShowPronunciationManager] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
+  const [startTime, setStartTime] = useState(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   useEffect(() => {
     const storedTexts = localStorage.getItem('ancient-texts');
@@ -71,6 +76,32 @@ function App() {
   useEffect(() => {
     localStorage.setItem('ancient-texts', JSON.stringify(savedTexts));
   }, [savedTexts]);
+
+  useEffect(() => {
+    let timer;
+    if (isTimerRunning && startTime !== null) {
+      timer = setInterval(() => {
+        setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isTimerRunning, startTime]);
+
+  const startTimer = () => {
+    setStartTime(Date.now());
+    setIsTimerRunning(true);
+    setElapsedTime(0);
+  };
+
+  const stopTimer = () => {
+    setIsTimerRunning(false);
+  };
+
+  const resetTimer = () => {
+    setStartTime(null);
+    setElapsedTime(0);
+    setIsTimerRunning(false);
+  };
 
   return (
     <div className="app-container">
@@ -139,6 +170,11 @@ function App() {
           </div>
         ) : (
           <div className="memorization-container">
+            {isTimerRunning || elapsedTime > 0 ? (
+              <div className="timer-display" style={{ marginTop: '1em' }}>
+                🕒 用时：{Math.floor(elapsedTime / 60)} 分 {elapsedTime % 60} 秒
+              </div>
+            ) : null}
             <h2>{currentText.title || '未选择文本'}</h2>
 
             {/* <TextDisplay 
@@ -151,10 +187,17 @@ function App() {
                 text={currentText.content}
                 pinyin={currentText.pinyin}
                 customPronunciations={currentText.customPronunciations}
-                onCorrectInput={(position) => setCurrentPosition(position)}
+                onCorrectInput={(position) => {
+                  if (!isTimerRunning && position === 1) startTimer();
+                  setCurrentPosition(position);
+                  if (position === currentText.content.length) {
+                    stopTimer();
+                  }
+                }}
                 resetTrigger={resetTrigger}
+                elapsedTime={elapsedTime}
               />
-              {currentText.content && currentPosition > 0 && currentPosition - 1 < currentText.content.length && (
+              {currentText.content && currentPosition > 0 && currentPosition < currentText.content.length && (
                 <div className="current-hint">
                   <small>当前字: <strong>{currentText.content[currentPosition - 1]}</strong></small>
                   {(() => {
@@ -175,21 +218,35 @@ function App() {
               {currentText.content && (
                 <button onClick={() => setShowPronunciationManager(true)}>多音字管理</button>
               )}
-              {currentText.content && currentPosition === currentText.content.length && (
-                <button
-                  onClick={() => {
-                    setCurrentPosition(0);
-                    setResetTrigger(prev => prev + 1);
+              <button
+                onClick={() => {
+                  setCurrentPosition(0);
+                  setResetTrigger(prev => prev + 1);
+                }}
+                style={{ backgroundColor: '#4caf50', fontWeight: 'bold' }}
+              >
+                重新开始
+              </button>
+              <div style={{ marginTop: '1em', display: 'flex', alignItems: 'center', gap: '0.5em' }}>
+                <label
+                  htmlFor="file-upload"
+                  style={{
+                    display: 'inline-block',
+                    padding: '6px 12px',
+                    backgroundColor: '#2196f3',
+                    color: 'white',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '14px'
                   }}
-                  style={{ backgroundColor: '#4caf50', fontWeight: 'bold' }}
                 >
-                  重新开始
-                </button>
-              )}
-              <div style={{ marginTop: '1em' }}>
+                  导入文本
+                </label>
                 <input
+                  id="file-upload"
                   type="file"
                   accept=".txt"
+                  style={{ display: 'none' }}
                   onChange={(e) => {
                     const file = e.target.files[0];
                     if (file) {
@@ -204,14 +261,21 @@ function App() {
                         setCurrentPosition(0);
                         localStorage.setItem('ancient-texts', JSON.stringify(updatedTexts));
                         localStorage.setItem('ancient-texts-last-selected', importedText.id);
-                        alert('导入成功');
+                        toast.success('导入成功！');
                       });
                     }
                   }}
                 />
                 <button
                   onClick={() => exportCurrentTextAsTxt(currentText)}
-                  style={{ marginLeft: '0.5em' }}
+                  style={{
+                    padding: '6px 12px',
+                    backgroundColor: '#4caf50',
+                    color: 'white',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
                 >
                   导出当前文本
                 </button>
@@ -220,6 +284,7 @@ function App() {
           </div>
         )}
       </div>
+      <ToastContainer />
     </div>
   );
 }

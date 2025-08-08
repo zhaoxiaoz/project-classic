@@ -34,9 +34,9 @@ function FileManagement({ savedTexts, onSelectText, onSaveText, onDeleteText }) 
       <h2>文件管理</h2>
       
       <div className="text-list">
-        <h3>已保存的古文</h3>
+        <h3>已保存的段落</h3>
         {savedTexts.length === 0 ? (
-          <p>暂无保存的古文</p>
+          <p>暂无保存的段落</p>
         ) : (
           <ul>
             {savedTexts.map(text => (
@@ -61,7 +61,7 @@ function FileManagement({ savedTexts, onSelectText, onSaveText, onDeleteText }) 
       
       {showAddForm ? (
         <div className="add-text-form">
-          <h3>添加新古文</h3>
+          <h3>添加新段落</h3>
           <div className="form-group">
             <label htmlFor="text-title">标题:</label>
             <input
@@ -69,7 +69,7 @@ function FileManagement({ savedTexts, onSelectText, onSaveText, onDeleteText }) 
               type="text"
               value={newTextTitle}
               onChange={(e) => setNewTextTitle(e.target.value)}
-              placeholder="输入古文标题"
+              placeholder="输入段落标题"
             />
           </div>
           
@@ -79,7 +79,7 @@ function FileManagement({ savedTexts, onSelectText, onSaveText, onDeleteText }) 
               id="text-content"
               value={newTextContent}
               onChange={(e) => setNewTextContent(e.target.value)}
-              placeholder="输入古文内容"
+              placeholder="输入段落内容"
               rows={6}
             />
           </div>

@@ -27,7 +27,7 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  color: #000;
+  color: gray;
 }
 
 .text-display {
@@ -58,28 +58,29 @@
 }
 
 .progress-container {
-  width: 100%;
-  margin-top: 1rem;
+  margin-top: 1em;
+  text-align: center;
 }
 
+.progress-bar-container {
+  width: 18em;
+  height: 1em;
+  background-color: #e0e0e0;
+  border-radius: 0.5em;
+  overflow: hidden;
+  margin: 0.25em auto;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 0.5em 0 0 0.5em;
+  transition: width 0.3s ease;
+}
 .progress {
   text-align: center;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
   color: #555;
-}
-
-.progress-bar-container {
-  width: 100%;
-  height: 8px;
-  background-color: #eee;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  transition: width 0.3s ease;
 }
 
 .completion-message {
@@ -214,6 +215,18 @@ button:hover {
 
 .cancel-btn:hover {
   background-color: #757575;
+}
+
+.displayed-chars {
+  max-width: 20em;
+  max-height: 10em;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word; 
+  font-size: 1.2em;
+  line-height: 1.5em;
+  text-align: left;
+  padding: 0.5em;
 }
 
 /* Pronunciation Manager */

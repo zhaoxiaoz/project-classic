@@ -76,7 +76,7 @@ function PronunciationManager({ text, customPronunciations, onSavePronunciations
   };
 
   const handleSave = () => {
-    console.log('Saving pronunciations:', pronunciations);
+    // console.log('Saving pronunciations:', pronunciations);
     onSavePronunciations(pronunciations);
   };
 

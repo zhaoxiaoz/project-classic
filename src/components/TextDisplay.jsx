@@ -1,5 +1,5 @@
 function TextDisplay({ text, currentPosition }) {
-  if (!text) return <div className="empty-text">请选择或添加一篇古文</div>;
+  if (!text) return <div className="empty-text">请选择或添加段落</div>;
 
   return (
     <div className="text-display">
