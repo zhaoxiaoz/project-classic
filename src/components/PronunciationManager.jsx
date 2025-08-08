@@ -145,18 +145,12 @@ function PronunciationManager({ text, customPronunciations, onSavePronunciations
                   className={`char-container ${isPunc ? 'punctuation' : ''}`}
                 >
                   <div 
-                    className={`char-item ${hasCustomPronunciation ? 'has-pronunciation' : ''}`}
-                    style={{ cursor: 'pointer' }}
+                    className={`char-item ${hasCustomPronunciation ? 'has-pronunciation' : ''} ${isPunc ? 'punctuation' : ''}`}
+                    style={{ cursor: isPunc ? 'default' : 'pointer' }}
                     onClick={() => {
                       if (isPunc) return;
-                      setNewChar(char);
-                      setSelectedPosition(index);
-                      // Pre-fill with default pinyin if available
-                      if (defaultPinyin[positionKey]) {
-                        setNewPinyin(defaultPinyin[positionKey]);
-                      } else {
-                        setNewPinyin('');
-                      }
+                      setEditingKey(positionKey);
+                      setEditingValue(pronunciations[positionKey] || defaultPinyin[positionKey] || '');
                     }}
                     title={isPunc ? '' : (pronunciations[positionKey] || defaultPinyin[positionKey] || '')}
                   >

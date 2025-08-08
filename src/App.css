@@ -360,6 +360,18 @@ button:hover {
   border-color: #2196f3;
 }
 
+.char-item.punctuation {
+  background: none !important;
+  border: none !important;
+  color: #999;
+  pointer-events: none;
+  cursor: default;
+}
+
+.char-item.punctuation:hover {
+  background-color: inherit; /* 不改变背景 */
+}
+
 .char-item {
   position: relative;
 }
