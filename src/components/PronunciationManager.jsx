@@ -122,7 +122,12 @@ function PronunciationManager({ text, customPronunciations, onSavePronunciations
         <p>点击下面的汉字进行拼音设置，在预览中能直接看到设置效果。自定义的拼音会显示为蓝色加粗。</p>
         {Object.keys(pronunciations).length > 0 && (
           <button 
-            onClick={handleRemoveAllPronunciations}
+            onClick={() => {
+              const confirmed = window.confirm('确定要清除所有自定义读音吗？此操作无法撤销。');
+              if (confirmed) {
+                handleRemoveAllPronunciations();
+              }
+            }}
             style={{ backgroundColor: '#ff9800', padding: '5px 10px' }}
           >
             清除所有自定义读音
