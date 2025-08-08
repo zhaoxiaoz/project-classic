@@ -5,6 +5,8 @@ function PronunciationManager({ text, customPronunciations, onSavePronunciations
   const [pronunciations, setPronunciations] = useState({ ...customPronunciations });
   const [newChar, setNewChar] = useState('');
   const [newPinyin, setNewPinyin] = useState('');
+  const [editingKey, setEditingKey] = useState(null);
+  const [editingValue, setEditingValue] = useState('');
 
   // Create a structure to hold all character positions
   const charPositions = useMemo(() => {
@@ -84,7 +86,7 @@ function PronunciationManager({ text, customPronunciations, onSavePronunciations
     <div className="pronunciation-manager">
       <h3>多音字管理</h3>
       
-      <div className="add-pronunciation">
+      {/* <div className="add-pronunciation">
         <div className="form-group">
           <label htmlFor="new-char">字符:</label>
           <input 
@@ -114,7 +116,7 @@ function PronunciationManager({ text, customPronunciations, onSavePronunciations
         >
           添加
         </button>
-      </div>
+      </div> */}
       
       <div className="info-message" style={{ margin: '1rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <p>点击下面的汉字进行拼音设置，在预览中能直接看到设置效果。自定义的拼音会显示为蓝色加粗。</p>
@@ -160,33 +162,71 @@ function PronunciationManager({ text, customPronunciations, onSavePronunciations
                   >
                     {char}
                   </div>
-                  {!isPunc && (
-                    <div 
-                      className="char-pinyin"
-                      onClick={() => {
-                        if (pronunciations[positionKey]) {
-                          handleRemovePronunciation(positionKey);
-                        } else if (defaultPinyin[positionKey]) {
-                          setNewChar(char);
-                          setSelectedPosition(index);
-                          setNewPinyin(defaultPinyin[positionKey]);
-                        }
-                      }}
-                    >
-                      {(pronunciations[positionKey] && 
-                        <span style={{
-                          color: '#2196f3', 
-                          fontWeight: 'bold', 
-                          cursor: 'pointer'
-                        }} title="点击删除该拼音设置">
-                          {pronunciations[positionKey]}
-                        </span>
-                      ) || 
-                      (defaultPinyin[positionKey] && 
-                        <span style={{color: '#666'}}>{defaultPinyin[positionKey]}</span>
-                      )}
-                    </div>
-                  )}
+                  <div className="char-pinyin" onDoubleClick={() => {
+                    if (isPunc) return;
+                    setEditingKey(positionKey);
+                    setEditingValue(pronunciations[positionKey] || defaultPinyin[positionKey] || '');
+                  }}>
+                    {editingKey === positionKey ? (
+                      <input
+                        type="text"
+                        value={editingValue}
+                        onChange={(e) => setEditingValue(e.target.value)}
+                        onBlur={() => {
+                          if (editingValue.trim()) {
+                            setPronunciations(prev => {
+                              const updated = { ...prev };
+                              if (editingValue.trim() === defaultPinyin[positionKey]) {
+                                // 如果和默认值相同，删除自定义配置
+                                delete updated[positionKey];
+                              } else {
+                                // 否则更新自定义拼音
+                                updated[positionKey] = editingValue.trim();
+                              }
+                              return updated;
+                            });
+                          }
+                          setEditingKey(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            if (editingValue.trim()) {
+                              setPronunciations(prev => {
+                                const updated = { ...prev };
+                                if (editingValue.trim() === defaultPinyin[positionKey]) {
+                                  // 如果和默认值相同，删除自定义配置
+                                  delete updated[positionKey];
+                                } else {
+                                  // 否则更新自定义拼音
+                                  updated[positionKey] = editingValue.trim();
+                                }
+                                return updated;
+                              });
+                            }
+                            setEditingKey(null);
+                          } else if (e.key === 'Escape') {
+                            setEditingKey(null);
+                          }
+                        }}
+                        autoFocus
+                        style={{ width: '60px' }}
+                      />
+                    ) : (
+                      <>
+                        {hasCustomPronunciation ? (
+                          <span
+                            style={{ color: '#2196f3', fontWeight: 'bold', cursor: 'pointer' }}
+                            title="双击编辑拼音"
+                          >
+                            {pronunciations[positionKey]}
+                          </span>
+                        ) : (
+                          <span style={{ color: '#ccc' }}>{defaultPinyin[positionKey]}</span>
+                        )}
+                      </>
+                    )}
+                  </div>
+                
                 </div>
               );
             })}

@@ -170,7 +170,7 @@ function App() {
           </div>
         ) : (
           <div className="memorization-container">
-            {isTimerRunning || elapsedTime > 0 ? (
+            {currentPosition < currentText.content.length && (isTimerRunning || elapsedTime > 0) ? (
               <div className="timer-display" style={{ marginTop: '1em' }}>
                 🕒 用时：{Math.floor(elapsedTime / 60)} 分 {elapsedTime % 60} 秒
               </div>
@@ -220,6 +220,7 @@ function App() {
               )}
               <button
                 onClick={() => {
+                  resetTimer();
                   setCurrentPosition(0);
                   setResetTrigger(prev => prev + 1);
                 }}
