@@ -94,13 +94,13 @@ const PronunciationChar = memo(function PronunciationChar({
           />
         ) : pronunciation ? (
           <span
-            style={{ color: '#2196f3', fontWeight: 'bold', cursor: 'pointer' }}
+            className="custom-pronunciation"
             title="双击编辑拼音"
           >
             {pronunciation}
           </span>
         ) : (
-          <span style={{ color: '#ccc' }}>{defaultPinyin}</span>
+          <span className="default-pronunciation">{defaultPinyin}</span>
         )}
       </div>
     </div>
@@ -192,7 +192,7 @@ function PronunciationManager({ text, customPronunciations, onSavePronunciations
                 handleRemoveAllPronunciations();
               }
             }}
-            style={{ backgroundColor: '#ff9800', padding: '5px 10px' }}
+            className="clear-pronunciations-btn"
           >
             清除所有自定义读音
           </button>
@@ -231,11 +231,6 @@ function PronunciationManager({ text, customPronunciations, onSavePronunciations
         <button
           onClick={handleSave}
           className="save-btn"
-          style={{
-            backgroundColor: '#4CAF50',
-            padding: '10px 20px',
-            fontSize: '16px'
-          }}
         >
           应用读音设置
         </button>

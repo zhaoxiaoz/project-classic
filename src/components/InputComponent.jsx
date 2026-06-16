@@ -189,9 +189,9 @@ function InputComponent({ text, pinyin, onCorrectInput, customPronunciations, re
             className="progress-bar" 
             style={{
               width: `${completionPercentage}%`,
-              backgroundColor: completionPercentage < 30 ? '#ff9800' : 
-                             completionPercentage < 70 ? '#2196f3' : 
-                             '#4caf50'
+              backgroundColor: completionPercentage < 30 ? 'var(--primary-top)' :
+                             completionPercentage < 70 ? 'var(--accent)' :
+                             'var(--success-hover)'
             }}
           />
         </div>
@@ -199,7 +199,7 @@ function InputComponent({ text, pinyin, onCorrectInput, customPronunciations, re
       
       {currentPosition >= text.length && text && text.length > 0 && (
         <div className="completion-message">
-          <h3>🎉 恭喜！你已完成记忆</h3>
+          <h3>🎉 恭喜！您已完成记忆</h3>
           <p>用时：{Math.floor(elapsedTime / 60)} 分 {elapsedTime % 60} 秒</p>
           <p>正确率：{totalInputs > 0 ? ((correctInputs / totalInputs) * 100).toFixed(1) : '0'}%</p>
           <p>可以点击“重新开始”按钮再次练习</p>

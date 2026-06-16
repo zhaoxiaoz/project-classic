@@ -42,6 +42,7 @@ function importSingleTextFromTxt(file, onLoad) {
 }
 
 function App() {
+  const [theme, setTheme] = useState(() => localStorage.getItem('ancient-texts-theme') || 'theme-ink-gold');
   const [currentText, setCurrentText] = useState({
     title: '',
     content: '',
@@ -78,6 +79,10 @@ function App() {
   }, [savedTexts]);
 
   useEffect(() => {
+    localStorage.setItem('ancient-texts-theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
     let timer;
     if (isTimerRunning && startTime !== null) {
       timer = setInterval(() => {
@@ -104,8 +109,19 @@ function App() {
   };
 
   return (
-    <div className="app-container">
-      <h1>古文默诵</h1>
+    <div className={`app-container ${theme}`}>
+      <header className="app-header">
+        <h1>古文默诵</h1>
+        <label className="theme-picker">
+          <span>配色</span>
+          <select value={theme} onChange={(e) => setTheme(e.target.value)}>
+            <option value="theme-ink-gold">玄金</option>
+            <option value="theme-celadon">青瓷</option>
+            <option value="theme-cinnabar">朱砂</option>
+            <option value="theme-pine">松烟</option>
+          </select>
+        </label>
+      </header>
 
       <div className="main-content">
         {showFileManagement ? (
@@ -203,7 +219,7 @@ function App() {
                   {(() => {
                     const key = `${currentPosition - 1}:${currentText.content[currentPosition - 1]}`;
                     if (currentText.customPronunciations?.[key]) {
-                      return <small>拼音: <strong style={{ color: '#2196f3' }}>{currentText.customPronunciations[key]}</strong></small>;
+                      return <small>拼音: <strong className="custom-pronunciation-hint">{currentText.customPronunciations[key]}</strong></small>;
                     } else if (currentText.pinyin?.[currentPosition - 1]) {
                       return <small>拼音: {currentText.pinyin[currentPosition - 1]}</small>;
                     }
