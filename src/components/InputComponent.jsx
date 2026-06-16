@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getPinyinInitial, isPunctuation } from '../utils/pinyinUtil';
 
 function InputComponent({ text, pinyin, onCorrectInput, customPronunciations, resetTrigger, elapsedTime }) {
@@ -10,18 +10,23 @@ function InputComponent({ text, pinyin, onCorrectInput, customPronunciations, re
   const [correctInputs, setCorrectInputs] = useState(0);
   
   const displayedCharsRef = useRef(null);
+  const inputRef = useRef(null);
 
   // Reset component state when a new text is loaded
   useEffect(() => {
     setInput('');
     setCurrentPosition(0);
     setDisplayedChars([]);
+    setTotalInputs(0);
+    setCorrectInputs(0);
   }, [text]);
 
   useEffect(() => {
     setInput('');
     setCurrentPosition(0);
     setDisplayedChars([]);
+    setTotalInputs(0);
+    setCorrectInputs(0);
   }, [resetTrigger]);
 
   useEffect(() => {
@@ -34,7 +39,7 @@ function InputComponent({ text, pinyin, onCorrectInput, customPronunciations, re
   // Used in getFollowingPunctuation
   
   // Get all punctuation marks up to the next non-punctuation character
-  const getFollowingPunctuation = (position) => {
+  const getFollowingPunctuation = useCallback((position) => {
     const punctuationChars = [];
     let pos = position;
     
@@ -47,9 +52,9 @@ function InputComponent({ text, pinyin, onCorrectInput, customPronunciations, re
       chars: punctuationChars,
       nextPosition: pos
     };
-  };
+  }, [text]);
   
-  // Skip punctuation on initial load and when text changes
+  // Skip punctuation whenever the active position lands on punctuation, including restart.
   useEffect(() => {
     if (text && currentPosition < text.length && isPunctuation(text[currentPosition])) {
       const { chars: punctuationChars, nextPosition } = getFollowingPunctuation(currentPosition);
@@ -62,7 +67,13 @@ function InputComponent({ text, pinyin, onCorrectInput, customPronunciations, re
       setCurrentPosition(nextPosition);
       onCorrectInput(nextPosition);
     }
-  }, [text]);
+  }, [currentPosition, getFollowingPunctuation, onCorrectInput, text]);
+
+  useEffect(() => {
+    if (inputRef.current && currentPosition < text.length) {
+      inputRef.current.focus();
+    }
+  }, [currentPosition, resetTrigger, text.length]);
 
   const getCurrentPinyinInitial = () => {
     if (!text || currentPosition >= text.length) return null;
@@ -153,6 +164,7 @@ function InputComponent({ text, pinyin, onCorrectInput, customPronunciations, re
       
       {currentPosition < text.length && (
         <input
+          ref={inputRef}
           type="text"
           value={input}
           onChange={handleInputChange}

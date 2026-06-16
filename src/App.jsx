@@ -34,7 +34,7 @@ function importSingleTextFromTxt(file, onLoad) {
     try {
       const imported = JSON.parse(e.target.result);
       onLoad(imported);
-    } catch (error) {
+    } catch {
       alert('导入失败，文件格式不正确');
     }
   };
@@ -105,7 +105,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <h1>Helper</h1>
+      <h1>古文默诵</h1>
 
       <div className="main-content">
         {showFileManagement ? (
@@ -213,74 +213,60 @@ function App() {
               )}
             </div>
 
-            <div className="controls">
-              <button onClick={() => setShowFileManagement(true)}>文件管理</button>
-              {currentText.content && (
-                <button onClick={() => setShowPronunciationManager(true)}>多音字管理</button>
-              )}
+            <div className="restart-row">
               <button
+                className="restart-btn"
                 onClick={() => {
                   resetTimer();
                   setCurrentPosition(0);
                   setResetTrigger(prev => prev + 1);
                 }}
-                style={{ backgroundColor: '#4caf50', fontWeight: 'bold' }}
               >
                 重新开始
               </button>
-              <div style={{ marginTop: '1em', display: 'flex', alignItems: 'center', gap: '0.5em' }}>
-                <label
-                  htmlFor="file-upload"
-                  style={{
-                    display: 'inline-block',
-                    padding: '6px 12px',
-                    backgroundColor: '#2196f3',
-                    color: 'white',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '14px'
-                  }}
-                >
-                  导入文本
-                </label>
-                <input
-                  id="file-upload"
-                  type="file"
-                  accept=".txt"
-                  style={{ display: 'none' }}
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      importSingleTextFromTxt(file, (importedText) => {
-                        const exists = savedTexts.find(text => text.id === importedText.id);
-                        const updatedTexts = exists
-                          ? savedTexts.map(text => text.id === importedText.id ? importedText : text)
-                          : [...savedTexts, importedText];
+            </div>
 
-                        setSavedTexts(updatedTexts);
-                        setCurrentText(importedText);
-                        setCurrentPosition(0);
-                        localStorage.setItem('ancient-texts', JSON.stringify(updatedTexts));
-                        localStorage.setItem('ancient-texts-last-selected', importedText.id);
-                        toast.success('导入成功！');
-                      });
-                    }
-                  }}
-                />
-                <button
-                  onClick={() => exportCurrentTextAsTxt(currentText)}
-                  style={{
-                    padding: '6px 12px',
-                    backgroundColor: '#4caf50',
-                    color: 'white',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '14px'
-                  }}
-                >
-                  导出当前文本
-                </button>
-              </div>
+            <div className="function-actions">
+              <button className="function-btn" onClick={() => setShowFileManagement(true)}>文件管理</button>
+              {currentText.content && (
+                <button className="function-btn" onClick={() => setShowPronunciationManager(true)}>多音字管理</button>
+              )}
+              <label
+                htmlFor="file-upload"
+                className="function-btn upload-label"
+              >
+                导入文本
+              </label>
+              <input
+                id="file-upload"
+                type="file"
+                accept=".txt"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    importSingleTextFromTxt(file, (importedText) => {
+                      const exists = savedTexts.find(text => text.id === importedText.id);
+                      const updatedTexts = exists
+                        ? savedTexts.map(text => text.id === importedText.id ? importedText : text)
+                        : [...savedTexts, importedText];
+
+                      setSavedTexts(updatedTexts);
+                      setCurrentText(importedText);
+                      setCurrentPosition(0);
+                      localStorage.setItem('ancient-texts', JSON.stringify(updatedTexts));
+                      localStorage.setItem('ancient-texts-last-selected', importedText.id);
+                      toast.success('导入成功！');
+                    });
+                  }
+                }}
+              />
+              <button
+                onClick={() => exportCurrentTextAsTxt(currentText)}
+                className="function-btn export-btn"
+              >
+                导出当前文本
+              </button>
             </div>
           </div>
         )}
